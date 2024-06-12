@@ -1,7 +1,9 @@
 from TinyGrader import *
 import random
+import numpy as np
 
 
+#%% Matrix functions
 def create_matrix(rows: int, cols: int, builder) -> list:
     mat = []
     for i in range(rows):
@@ -34,6 +36,7 @@ def mat_mul(m1: list, m2: list) -> list:
     return m
 
 
+#%% Optimizers
 class SGD:
     def __init__(self, lr=0.01):
         self.params = None
@@ -70,7 +73,7 @@ class MGD:
         for layer in self.params:
             for ws in layer:
                 for w in ws:
-                    g = obj.grad(w)
+                    g = obj.grad(w[0])
                     delta = self.mu * w[1] - self.lr * g
                     w[0].set_value(w[0].value() + delta)
                     w[1] = delta
@@ -102,9 +105,9 @@ class RMSEGD:
         for layer in self.params:
             for ws in layer:
                 for w in ws:
-                    g = obj.grad(w)
+                    g = obj.grad(w[0])
                     r = smooth(self.beta, w[1], g ** 2)
-                    lr = self.lr / (pow(r, 0.5) + eps)
+                    lr = self.lr / (np.sqrt(r) + eps)
                     w[0].set_value(w[0].value() - lr * g)
                     w[1] = r
 
@@ -127,9 +130,9 @@ class Adam:
         for layer in self.params:
             for ws in layer:
                 for w in ws:
-                    g = obj.grad(w)
+                    g = obj.grad(w[0])
                     r = smooth(self.beta, w[1], g ** 2)
-                    lr = self.lr / (pow(r, 0.5) + eps)
+                    lr = self.lr / (np.sqrt(r) + eps)
                     v = smooth(self.mu, w[2], g)
                     delta = lr * v
                     w[0].set_value(w[0].value() - delta)

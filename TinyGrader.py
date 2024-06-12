@@ -1,4 +1,4 @@
-import math
+import numpy as np
 
 
 class Expression:
@@ -135,10 +135,11 @@ class Pow(Expression):
         self.b = b
 
     def value(self) -> float:
-        return pow(self.a.value(), self.b.value())
+
+        return np.power(self.a.value(), self.b.value())
 
     def grad(self, x) -> float:
-        res = self.b.value() * pow(self.a.value(), self.b.value() - 1)
+        res = self.b.value() * np.power(self.a.value(), self.b.value() - 1)
         if self.a.has_symbol(x):
             res *= self.a.grad(x)
         if self.b.has_symbol(x):
@@ -154,10 +155,10 @@ class Exp(Expression):
         self.a = a
 
     def value(self) -> float:
-        return math.exp(self.a.value())
+        return np.exp(self.a.value())
 
     def grad(self, x) -> float:
-        res = math.exp(self.a.value())
+        res = np.exp(self.a.value())
         if self.a.has_symbol(x):
             res *= self.a.grad(x)
         return res
@@ -166,10 +167,31 @@ class Exp(Expression):
         return self.a.has_symbol(x)
 
 
+class Max(Expression):
+    def __init__(self, a: Expression, b: Expression):
+        self.a = a
+        self.b = b
+
+    def value(self) -> float:
+        return max(self.a.value(), self.b.value())
+
+    def grad(self, x) -> float:
+        if self.a.value() > self.b.value():
+            return self.a.grad(x)
+        elif self.b.value() > self.a.value():
+            return self.b.grad(x)
+        else:
+            return (self.a.grad(x) + self.b.grad(x)) / 2
+
+    def has_symbol(self, x) -> bool:
+        return self.a.has_symbol(x) or self.b.has_symbol(x)
+
+
+# tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x))
 class Tanh(Expression):
     def __init__(self, a: Expression):
-        self.exp = Div(Sub(Exp(Mul(Const(2), a)), Exp(a)),
-                       Add(Exp(Mul(Const(2), a)), Exp(a)))
+        self.exp = Div(Sub(Exp(Mul(Const(2), a)), Const(1)),
+                       Add(Exp(Mul(Const(2), a)), Const(1)))
 
     def value(self) -> float:
         return self.exp.value()
@@ -181,9 +203,25 @@ class Tanh(Expression):
         return self.exp.has_symbol(x)
 
 
+# sigmoid(x) = 1 / (1 + exp(-x))
 class Sigmoid(Expression):
     def __init__(self, a: Expression):
-        self.exp = Div(Exp(a), Add(Number(1), Exp(a)))
+        self.exp = Div(Exp(a), Add(Const(1), Exp(a)))
+
+    def value(self) -> float:
+        return self.exp.value()
+
+    def grad(self, x) -> float:
+        return self.exp.grad(x)
+
+    def has_symbol(self, x) -> bool:
+        return self.exp.has_symbol(x)
+
+
+# ReLU(x) = max(x, 0)
+class ReLU(Expression):
+    def __init__(self, a: Expression):
+        self.exp = Max(Const(0), a)
 
     def value(self) -> float:
         return self.exp.value()
