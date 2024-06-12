@@ -21,18 +21,24 @@ dx *= 2
 class Const:
     def __init__(self, v):
         self.v = v
+
     def value(self) -> float:
         return self.v
+
     def grad(self, x) -> float:
         return 0
+
 
 class Number:
     def __init__(self, v: float):
         self.v = v
+
     def value(self) -> float:
         return self.v
+
     def set_value(self, v: float) -> None:
         self.v = v
+
     def grad(self, x) -> float:
         if x == self:
             return 1
@@ -47,8 +53,10 @@ class Add:
     def __init__(self, a, b):
         self.a = a
         self.b = b
+
     def value(self) -> float:
         return self.a.value() + self.b.value()
+
     def grad(self, x) -> float:
         return self.a.grad(x) + self.b.grad(x)
 ```
@@ -59,9 +67,9 @@ class Add:
 x = Number(0)
 y = Number(1)
 exp = Add(y, Add(x, Const(1)))
-exp.grad(x) # exp在x=0，y=1时对x的梯度
+exp.grad(x)  # exp在x=0，y=1时对x的梯度
 x.set_value(1)
-exp.value() # exp在x=1，y=1时的值
+exp.value()  # exp在x=1，y=1时的值
 ```
 
 这样构造出来的表达式就像是数据结构里的二叉树一样，计算梯度和求值实际上就是在做树的遍历，了解过LISP的人可能会感到非常亲切。
@@ -90,10 +98,13 @@ exp.value() # exp在x=1，y=1时的值
 
 ![](images/best.png)
 
+不过采用四个特征的测试我也做了，因为不好画图所以只展示一下准确率和损失曲线：
+
 ![](images/record.png)
 
 ## Future
 
 实际上我不打算再发展这个小玩具了，尽管它bug频多、效率低下（~~我是废物😭~~），可以改善的地方还有很多，但是我因为这个东西已经两天没睡好觉了，我想让我的大脑好好放松一下。
 
-造轮子其实是个有趣的过程，在做这个东西的过程中，我体会到了面向对象的不足、LISP 语法的强大等等东西，这些都是我当脚本小子所感受不到的，如果我的拙作对你有所帮助，那么我很荣幸;)
+造轮子其实是个有趣的过程，在做这个东西的过程中，我体会到了面向对象的不足、LISP
+语法的强大等等东西，这些都是我当脚本小子所感受不到的，如果我的拙作对你有所帮助，那么我很荣幸;)

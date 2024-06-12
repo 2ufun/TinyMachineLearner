@@ -1,6 +1,7 @@
+import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
+
 from TinyLearner import *
 
 # %% read data

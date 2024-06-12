@@ -1,11 +1,12 @@
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
+
 from TinyLearner import *
 
 # %% read data
 df = pd.read_csv('data/iris.data', header=None)
-X = np.array(df.iloc[:, 2:4])
+X = np.array(df.iloc[:, 0:4])
 name_dict = {'Iris-setosa': 0, 'Iris-versicolor': 1}
 y = df.iloc[:, 4].map(name_dict).to_numpy()
 
@@ -18,8 +19,8 @@ X_train, X_test, y_train, y_test = \
 
 class Classifier:
     def __init__(self, optimum):
-        self.x = [[Number(0)], [Number(0)]]
-        self.weights_from_input = create_randoms(5, 2, seed=42)
+        self.x = [[Number(0)], [Number(0)], [Number(0)], [Number(0)]]
+        self.weights_from_input = create_randoms(5, 4, seed=42)
         self.bias_from_input = create_randoms(5, 1, seed=42)
         self.weights_to_output = create_randoms(1, 5, seed=42)
         self.bias_to_output = create_randoms(1, 1, seed=42)
@@ -32,7 +33,7 @@ class Classifier:
 
         self.y = Number(0)
         d = Sub(self.y, self.net[0][0])
-        self.loss = Abs(d)
+        self.loss = Mul(Const(0.5), Sqr(d))
 
         self.optimum = optimum
         self.optimum.set_params([self.weights_from_input,
@@ -41,13 +42,13 @@ class Classifier:
                                  self.bias_to_output])
 
     def __call__(self, x) -> float:
-        self.x[0][0].set_value(x[0])
-        self.x[1][0].set_value(x[1])
+        for i in range(len(x)):
+            self.x[i][0].set_value(x[i])
         return self.net[0][0].value()
 
     def fit(self, x, y):
-        self.x[0][0].set_value(x[0])
-        self.x[1][0].set_value(x[1])
+        for i in range(len(x)):
+            self.x[i][0].set_value(x[i])
         self.y.set_value(y)
         self.optimum.step(self.loss)
 
@@ -68,9 +69,7 @@ def save_state():
     mse = np.mean(np.square(y - y_logits))
     y_pred = [np.round(sigmoid(y_logits))]
     acc = np.sum(y_pred == y) / len(y)
-    plt.title(f'MSE={mse:.6f}')
-    plt.scatter(x=X[:, 0], y=X[:, 1], c=y_pred, cmap=plt.cm.RdYlBu)
-    plt.savefig('images/best.png')
+    print(f'MSE: {mse}')
 
 
 best_acc = 0

@@ -1,6 +1,8 @@
-from TinyGrader import *
 import random
+
 import numpy as np
+
+from TinyGrader import *
 
 
 # %% Matrix functions
