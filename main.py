@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from TinyLearner import *
 
-df = pd.read_csv('./mlp_demo_data_part1.csv')
+df = pd.read_csv('data/mlp_demo_data_part1.csv')
 
 xs = np.array(df[['u(k)', 'y(k)']])
 ys = np.array(df['y1'])
