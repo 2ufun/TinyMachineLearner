@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from TinyLearner import *
 
-#%% read data
+# %% read data
 df = pd.read_csv('data/mlp_demo_data_part1.csv')
 
 xs = np.array(df[['u(k)', 'y(k)']])
@@ -13,7 +13,7 @@ X_train, X_test, y_train, y_test = \
     train_test_split(xs, ys, test_size=0.4, random_state=42)
 
 
-#%% build neural network
+# %% build neural network
 class NN:
     def __init__(self, optimum):
         self.x = [[Number(0)], [Number(0)]]
@@ -26,7 +26,7 @@ class NN:
 
         self.y = Number(0)
         d = Sub(self.y, self.net[0][0])
-        self.loss = Mul(Const(0.5), Pow(d, Const(2)))
+        self.loss = Mul(Const(0.5), Sqr(d))
 
         self.optimum = optimum
         self.optimum.set_params([self.weights_from_input, self.weights_to_output])
@@ -45,7 +45,7 @@ class NN:
 
 nn = NN(Adam(lr=0.01))
 
-#%% train and test model
+# %% train and test model
 for _ in range(2):
     for ax, ay in zip(X_train, y_train):
         nn.fit(ax, ay)

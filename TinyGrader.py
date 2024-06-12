@@ -129,25 +129,18 @@ class Abs(Expression):
         return self.a.has_symbol(x)
 
 
-class Pow(Expression):
-    def __init__(self, a: Expression, b: Expression):
-        self.a = a
-        self.b = b
+class Sqr(Expression):
+    def __init__(self, a: Expression):
+        self.exp = Mul(a, a)
 
     def value(self) -> float:
-
-        return np.power(self.a.value(), self.b.value())
+        return self.exp.value()
 
     def grad(self, x) -> float:
-        res = self.b.value() * np.power(self.a.value(), self.b.value() - 1)
-        if self.a.has_symbol(x):
-            res *= self.a.grad(x)
-        if self.b.has_symbol(x):
-            res *= self.b.grad(x)
-        return res
+        return self.exp.grad(x)
 
     def has_symbol(self, x) -> bool:
-        return self.a.has_symbol(x) or self.b.has_symbol(x)
+        return self.exp.has_symbol(x)
 
 
 class Exp(Expression):

@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 
-#%% Matrix functions
+# %% Matrix functions
 def create_matrix(rows: int, cols: int, builder) -> list:
     mat = []
     for i in range(rows):
@@ -36,7 +36,21 @@ def mat_mul(m1: list, m2: list) -> list:
     return m
 
 
-#%% Optimizers
+def mat_add(m1: list, m2: list) -> list:
+    if len(m1) != len(m2) or len(m1[0]) != len(m2[0]):
+        raise Exception
+
+    res = []
+    for i in range(len(m1)):
+        row = []
+        for j in range(len(m1[0])):
+            row.append(Add(m1[i][j], m2[i][j]))
+        res.append(row)
+
+    return res
+
+
+# %% Optimizers
 class SGD:
     def __init__(self, lr=0.01):
         self.params = None
