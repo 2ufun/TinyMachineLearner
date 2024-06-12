@@ -151,10 +151,31 @@ class Exp(Expression):
         return np.exp(self.a.value())
 
     def grad(self, x) -> float:
-        res = np.exp(self.a.value())
         if self.a.has_symbol(x):
+            res = np.exp(self.a.value())
             res *= self.a.grad(x)
-        return res
+            return res
+        else:
+            return 0
+
+    def has_symbol(self, x) -> bool:
+        return self.a.has_symbol(x)
+
+
+class Log2(Expression):
+    def __init__(self, a: Expression):
+        self.a = a
+
+    def value(self) -> float:
+        return np.log2(self.a.value())
+
+    def grad(self, x) -> float:
+        if self.a.has_symbol(x):
+            res = 1 / (self.a.value() * np.log(2))
+            res *= self.a.grad(x)
+            return res
+        else:
+            return 0
 
     def has_symbol(self, x) -> bool:
         return self.a.has_symbol(x)
