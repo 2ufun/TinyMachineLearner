@@ -72,14 +72,23 @@ class Classifier:
         self.optimum.step(self.loss)
 
 
-classifier = Classifier(Adam(lr=0.01))
+classifier = Classifier(RMSEGD(lr=0.01))
 
 # %% train model
-best_acc = 0
+
 acc_record = []
-loss_record = []
-epochs = 50
-for epoch in range(epochs):
+y_logits = []
+for ax in X_test:
+    y_logits.append(classifier(ax))
+y_pred = np.array([softmax(ay).argmax() for ay in y_logits])
+
+acc = 100 * (np.sum(y_pred == y_test) / len(y_test))
+acc_record.append(acc)
+
+best_acc = 0
+#epochs = 100
+epoch = 0
+while best_acc < 100:
     # train loop
     for ax, ay in zip(X_train, y_train):
         classifier.fit(ax, ay)
@@ -95,14 +104,19 @@ for epoch in range(epochs):
 
     if acc > best_acc:
         best_acc = acc
-        plot_decision_boundary(classifier, X, y, 'images/adam_boundary.png')
+        plot_decision_boundary(classifier, X_test, y_test, 'images/rmsegd_boundary.png')
 
-    print(f'[{epoch + 1}] Accuracy: {acc:.2f}, Best Accuracy: {best_acc:.2f}')
+    print(f'[{epoch}] Accuracy: {acc:.2f}, Best Accuracy: {best_acc:.2f}')
+    epoch += 1
 
-plt.plot(range(0, epochs), acc_record)
-plt.title('Accuracy Figure')
+idx = np.argmax(acc_record)
+max_v = np.max(acc_record)
+plt.plot(acc_record)
 plt.xlabel('Epoch')
 plt.ylabel('Accuracy(%)')
 plt.grid(True)
-plt.savefig(f'images/adam_accuracy_figure.png')
+plt.scatter(idx, max_v, marker='x', color='r', s=50, label='Max value')
+plt.text(idx, max_v, f'epoch:{idx}\naccuracy:{max_v:.2f}%',
+         color='black', fontsize=14, ha='center', va='bottom')
+plt.savefig(f'images/rmsegd_accuracy_figure.png')
 plt.show()
