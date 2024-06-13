@@ -88,9 +88,9 @@ exp.value()  # exp在x=1，y=1时的值
 
 我在经典的石蕊数据集做了测试，分类效果还不错：
 
-![](images/boundary_decision_boundary.png)
+![](images/adam_boundary.png)
 
-![](images/accuracy_figure.png)
+![](images/adam_accuracy_figure.png)
 
 对石蕊数据集的测试有三个文件：
 

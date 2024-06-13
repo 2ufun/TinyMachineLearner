@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 
 from TinyLearner import *
+from helper import sigmoid
 
 # %% read data
 df = pd.read_csv('data/iris-binary.data', header=None)
@@ -57,12 +58,6 @@ classifier = Classifier(Adam(lr=0.01))
 
 
 # %% train model
-
-
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
-
-
 def save_state():
     global y_logits, y_pred, acc
     y_logits = np.array([classifier(x) for x in X])

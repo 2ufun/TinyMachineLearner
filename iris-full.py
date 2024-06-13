@@ -1,9 +1,8 @@
 import pandas as pd
-from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 
 from TinyLearner import *
-from helper import softmax
+from helper import softmax, softmax_for_network
 
 # %% read data
 df = pd.read_csv('data/iris.data', header=None)
@@ -13,6 +12,7 @@ y = df.iloc[:, 4].map(name_dict).to_numpy()
 
 X_train, X_test, y_train, y_test = \
     train_test_split(X, y, test_size=0.4, random_state=42)
+
 
 # %% build neural network
 
@@ -43,7 +43,7 @@ class Classifier:
 
         self.y = [Number(0), Number(0), Number(0)]
 
-        prob = Softmax([n[0] for n in self.net])
+        prob = softmax_for_network([n[0] for n in self.net])
         prod = [Mul(self.y[i], Log(prob[i])) for i in range(len(self.y))]
         self.loss = Neg(Add(*prod))
 
@@ -74,12 +74,9 @@ class Classifier:
 
 classifier = Classifier(Adam(lr=0.01))
 
-
 # %% train model
 best_acc = 0
-loss_record = []
-acc_record = []
-for epoch in range(50):
+for epoch in range(20):
     for ax, ay in zip(X_train, y_train):
         classifier.fit(ax, ay)
 
@@ -87,23 +84,7 @@ for epoch in range(50):
     y_pred = np.array([softmax(ay).argmax() for ay in y_logits])
     acc = np.sum(y_pred == y_test) / len(y_test)
 
-    acc_record.append(acc)
-    loss_record.append(classifier.loss.value())
-
     if acc > best_acc:
         best_acc = acc
 
     print(f'[{epoch}] Accuracy: {acc}, Best Accuracy: {best_acc}')
-
-
-plt.plot(loss_record)
-plt.title('Loss Figure')
-plt.grid(True)
-plt.savefig('images/loss_figure.png')
-plt.show()
-
-plt.plot(acc_record)
-plt.title('Accuracy Figure')
-plt.grid(True)
-plt.savefig('images/accuracy_figure.png')
-plt.show()

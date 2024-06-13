@@ -215,12 +215,6 @@ class Max(Expression):
         return self.a.has_symbol(x) or self.b.has_symbol(x)
 
 
-def Softmax(exps: list) -> list:
-    tmp = [Exp(exp) for exp in exps]
-    n = Add(*tmp)
-    return [Div(Exp(exp), n) for exp in exps]
-
-
 # tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x))
 class Tanh(Expression):
     def __init__(self, a: Expression):
