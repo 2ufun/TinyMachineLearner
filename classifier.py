@@ -1,8 +1,11 @@
+import pickle
+
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 
 from TinyLearner import *
+from helper import plot_decision_boundary, softmax
 
 # %% read data
 df = pd.read_csv('data/iris.data', header=None)
@@ -47,9 +50,10 @@ class Classifier:
         self.net = mat_add(self.bias_to_output, tmp)
 
         self.y = [Number(0), Number(0), Number(0)]
-        d = [Abs(Sub(self.y[i], self.net[i][0])) for i in range(len(self.y))]
-        d = Add(*d)
-        self.loss = Abs(d)
+
+        prob = Softmax([n[0] for n in self.net])
+        prod = [Mul(self.y[i], Log(prob[i])) for i in range(len(self.y))]
+        self.loss = Neg(Add(*prod))
 
         self.optimum = optimum
         self.optimum.set_params([self.weights_from_input,
@@ -80,29 +84,40 @@ classifier = Classifier(Adam(lr=0.01))
 
 
 # %% train model
-
-def softmax(x):
-    return np.exp(x) / np.sum(np.exp(x), axis=0)
-
-
-for epoch in range(500):
-    print('Epoch:', epoch)
+best_acc = 0
+loss_record = []
+acc_record = []
+for epoch in range(50):
     for ax, ay in zip(X_train, y_train):
         classifier.fit(ax, ay)
 
+    y_logits = np.array([classifier(ax) for ax in X_test])
+    y_pred = np.array([softmax(ay).argmax() for ay in y_logits])
+    acc = np.sum(y_pred == y_test) / len(y_test)
 
-y_preds = []
+    acc_record.append(acc)
+    loss_record.append(classifier.loss.value())
 
-for ax in X:
-    y_logits = np.array(classifier(ax))
-    y_pred = softmax(y_logits).argmax()
-    y_preds.append(y_pred)
+    if acc > best_acc:
+        best_acc = acc
+        plot_decision_boundary(classifier, X, y)
 
-acc = np.sum(y_preds == y) / len(y)
-print(f'Accuracy: {acc}')
+    print(f'[{epoch}] Accuracy: {acc}, Best Accuracy: {best_acc}')
 
-plt.scatter(x=X[:, 0],
-            y=X[:, 1],
-            c=y_preds,
-            cmap=plt.cm.RdYlBu)
+with open('acc_record.bin', 'wb') as file:
+    pickle.dump(acc_record, file)
+
+with open('loss_record.bin', 'wb') as file:
+    pickle.dump(loss_record, file)
+
+plt.plot(loss_record)
+plt.title('Loss Figure')
+plt.grid(True)
+plt.savefig('images/loss_figure.png')
+plt.show()
+
+plt.plot(acc_record)
+plt.title('Accuracy Figure')
+plt.grid(True)
+plt.savefig('images/accuracy_figure.png')
 plt.show()

@@ -78,6 +78,20 @@ class Sub(Expression):
         return self.a.has_symbol(x) or self.b.has_symbol(x)
 
 
+class Neg(Expression):
+    def __init__(self, v):
+        self.v = v
+
+    def value(self) -> float:
+        return -self.v.value()
+
+    def grad(self, x) -> float:
+        return -self.v.grad(x)
+
+    def has_symbol(self, x) -> bool:
+        return self.v.has_symbol(x)
+
+
 class Mul(Expression):
     def __init__(self, a: Expression, b: Expression):
         self.a = a
@@ -162,16 +176,16 @@ class Exp(Expression):
         return self.a.has_symbol(x)
 
 
-class Log2(Expression):
+class Log(Expression):
     def __init__(self, a: Expression):
         self.a = a
 
     def value(self) -> float:
-        return np.log2(self.a.value())
+        return np.log(self.a.value())
 
     def grad(self, x) -> float:
         if self.a.has_symbol(x):
-            res = 1 / (self.a.value() * np.log(2))
+            res = 1 / self.a.value()
             res *= self.a.grad(x)
             return res
         else:
@@ -199,6 +213,12 @@ class Max(Expression):
 
     def has_symbol(self, x) -> bool:
         return self.a.has_symbol(x) or self.b.has_symbol(x)
+
+
+def Softmax(exps: list) -> list:
+    tmp = [Exp(exp) for exp in exps]
+    n = Add(*tmp)
+    return [Div(Exp(exp), n) for exp in exps]
 
 
 # tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x))
