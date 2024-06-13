@@ -103,7 +103,7 @@ def smooth(beta, average, g):
     return beta * average + (1 - beta) * g
 
 
-class RMSEGD:
+class RMSGD:
     def __init__(self, lr=0.01, beta=0.9):
         self.params = None
         self.lr = lr

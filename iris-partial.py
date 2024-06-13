@@ -16,8 +16,6 @@ X_train, X_test, y_train, y_test = \
 
 
 # %% build neural network
-
-
 class Classifier:
     def __init__(self, optimum):
         self.x = [[Number(0)], [Number(0)]]
