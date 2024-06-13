@@ -86,23 +86,17 @@ exp.value()  # exp在x=1，y=1时的值
 
 ## Application
 
-测试用例是我们智能控制必修课的一个实验用数据集（~~比玩具还玩具~~）：
-
-![](images/data.png)
-
-我搭建了一个只有单个隐藏层的神经网络，神经元个数只有3个，激活函数用的Tanh，0.01的学习率迭代了20次，拟合效果还不错：
-
-![](images/test.png)
-
-还有经典的石蕊数据集，为了方便画图，我只用了其中的两个特征，分类效果还不错：
+我在经典的石蕊数据集做了测试，分类效果还不错：
 
 ![](images/boundary_decision_boundary.png)
 
 ![](images/accuracy_figure.png)
 
-2024/6/13 更新
+对石蕊数据集的测试有三个文件：
 
-多分类问题也解决了，懒得放图了，直接看程序吧（classifier.py）
+- iris-binary.py: 删除了一个石蕊种类，用于测试二分类
+- iris-partial.py: 只用了两个特征进行多分类测试，便于画图
+- iris-full.py：用了全部四个特征，多分类测试
 
 ## Future
 
