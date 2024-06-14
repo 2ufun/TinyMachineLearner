@@ -3,11 +3,11 @@ import time
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from TinyLearnerBeta import *
-from helper import plot_decision_boundary, softmax_for_network
+from Beta.TinyLearner import *
+from Beta.helper import plot_decision_boundary, softmax_for_network
 
 # %% read data
-df = pd.read_csv('../data/iris.data', header=None)
+df = pd.read_csv('data/iris.data', header=None)
 X = np.array(df.iloc[:, 2:4])
 name_dict = {'Iris-setosa': 0, 'Iris-versicolor': 1, 'Iris-virginica': 2}
 y = df.iloc[:, 4].map(name_dict).to_numpy()
@@ -76,11 +76,9 @@ classifier = Classifier(SGD(lr=0.01))
 # %% train model
 
 start = time.time()
-for i in range(10):
+for i in range(1):
     for ax, ay in zip(X_train, y_train):
         classifier.fit(ax, ay)
 end = time.time()
-
-plot_decision_boundary(classifier, X_test, y_test, '../beta_boundary.png')
 
 print(f'time: {end - start}')

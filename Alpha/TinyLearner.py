@@ -1,6 +1,6 @@
 import random
 
-from TinyGraderAlpha import *
+from Alpha.TinyGrader import *
 
 
 # %% Matrix functions

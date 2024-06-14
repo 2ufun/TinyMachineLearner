@@ -1,6 +1,6 @@
 import random
 
-from TinyGraderBeta import *
+from Beta.TinyGrader import *
 
 
 # %% Matrix functions
@@ -66,7 +66,7 @@ class SGD:
         for layer in self.params:
             for ws in layer:
                 for w in ws:
-                    g = obj.grad_backward(w)
+                    g = obj.grad(w)
                     w.set_value(w.value() - self.lr * g)
 
 
@@ -87,7 +87,7 @@ class MGD:
         for layer in self.params:
             for ws in layer:
                 for w in ws:
-                    g = obj.grad_backward(w[0])
+                    g = obj.grad(w[0])
                     delta = self.mu * w[1] - self.lr * g
                     w[0].set_value(w[0].value() + delta)
                     w[1] = delta
@@ -119,7 +119,7 @@ class RMSGD:
         for layer in self.params:
             for ws in layer:
                 for w in ws:
-                    g = obj.grad_backward(w[0])
+                    g = obj.grad(w[0])
                     r = smooth(self.beta, w[1], g ** 2)
                     lr = self.lr / (np.sqrt(r) + eps)
                     w[0].set_value(w[0].value() - lr * g)
@@ -144,7 +144,7 @@ class Adam:
         for layer in self.params:
             for ws in layer:
                 for w in ws:
-                    g = obj.grad_backward(w[0])
+                    g = obj.grad(w[0])
                     r = smooth(self.beta, w[1], g ** 2)
                     lr = self.lr / (np.sqrt(r) + eps)
                     v = smooth(self.mu, w[2], g)

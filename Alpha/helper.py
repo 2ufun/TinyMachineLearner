@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 
-from TinyGraderAlpha import *
+from Alpha.TinyGrader import *
 
 
 def softmax(x):

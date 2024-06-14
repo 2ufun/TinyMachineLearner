@@ -54,7 +54,7 @@ class Add(Expression):
         return sum(map(lambda x: x.value(), self.args))
 
     def grad(self, x) -> float:
-        return sum(map(lambda a: a.grad_backward(x), self.args))
+        return sum(map(lambda a: a.grad(x), self.args))
 
     def has_symbol(self, x) -> bool:
         for arg in self.args:
@@ -86,7 +86,7 @@ class Neg(Expression):
         return -self.v.value()
 
     def grad(self, x) -> float:
-        return -self.v.grad_backward(x)
+        return -self.v.grad(x)
 
     def has_symbol(self, x) -> bool:
         return self.v.has_symbol(x)
