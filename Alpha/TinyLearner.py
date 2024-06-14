@@ -74,3 +74,103 @@ class SGD:
             for ws in layer:
                 for w in ws:
                     w.v = w.v - self.lr * w.g
+
+
+class MGD:
+    def __init__(self, lr=0.01, mu=0.9):
+        self.params = None
+
+        self.lr = lr
+        self.mu = mu
+
+    def set_params(self, params):
+        self.params = [[[[w, 0] for w in ws] for ws in _] for _ in params]
+
+    def zero_grad(self):
+        for layer in self.params:
+            for ws in layer:
+                for w in ws:
+                    w[0].zero_grad()
+
+    def step(self):
+        if self.params is None:
+            raise Exception
+
+        for layer in self.params:
+            for ws in layer:
+                for w in ws:
+                    delta = self.mu * w[1] - self.lr * w[0].g
+                    w[0].v = w[0].v + delta
+                    w[1] = delta
+
+
+eps = 1
+while 1 < 1 + eps:
+    eps /= 2
+eps *= 2
+
+
+def smooth(beta, average, g):
+    return beta * average + (1 - beta) * g
+
+
+class RMSGD:
+    def __init__(self, lr=0.01, beta=0.9):
+        self.params = None
+        self.lr = lr
+        self.beta = beta
+
+    def set_params(self, params):
+        self.params = [[[[w, 0] for w in ws] for ws in _] for _ in params]
+
+    def zero_grad(self):
+        for layer in self.params:
+            for ws in layer:
+                for w in ws:
+                    w[0].zero_grad()
+
+    def step(self):
+        if self.params is None:
+            raise Exception
+
+        for layer in self.params:
+            for ws in layer:
+                for w in ws:
+                    r = smooth(self.beta, w[1], w[0].g ** 2)
+                    lr = self.lr / (np.sqrt(r) + eps)
+                    w[0].v = w[0].v - lr * w[0].g
+                    w[1] = r
+
+
+class Adam:
+    def __init__(self, lr=0.01, beta=0.9, mu=0.9):
+        self.params = None
+
+        self.lr = lr
+        self.mu = mu
+        self.beta = beta
+
+    def set_params(self, params):
+        self.params = [[[[w, 0, 0] for w in ws] for ws in _] for _ in params]
+
+    def zero_grad(self):
+        for layer in self.params:
+            for ws in layer:
+                for w in ws:
+                    w[0].zero_grad()
+
+    def step(self):
+        if self.params is None:
+            raise Exception
+
+        for layer in self.params:
+            for ws in layer:
+                for w in ws:
+                    r = smooth(self.beta, w[1], w[0].g ** 2)
+                    lr = self.lr / (np.sqrt(r) + eps)
+                    v = smooth(self.mu, w[2], w[0].g)
+                    delta = lr * v
+                    w[0].v = w[0].v - delta
+                    w[1] = r
+                    w[2] = v
+

@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from Alpha.TinyLearner import *
-from Alpha.helper import softmax_for_network
+from Alpha.helper import softmax_for_network, softmax, plot_decision_boundary
 
 df = pd.read_csv('data/iris.data', header=None)
 xs = np.array(df.iloc[:, 2:4])
@@ -62,12 +62,32 @@ class NN:
         self.optimizer.step()
 
 
-nn = NN(SGD(0.01))
+nn = NN(Adam(0.01))
+
+best_acc = 0
 
 start = time.time()
-for i in range(1):
+for i in range(50):
+    # train loop
     for ax, ay in zip(X_train, y_train):
         nn.step(ax, ay)
-end = time.time()
 
-print(f'time: {end - start}')
+    # test loop
+    y_preds = []
+
+    for ax in X_test:
+        y_logits = nn(ax)
+        y_pred = np.argmax(softmax(y_logits))
+        y_preds.append(y_pred)
+
+    y_preds = np.array(y_preds)
+    tf = np.sum(y_preds == y_test)
+    acc = tf / len(y_preds)
+
+    if acc > best_acc:
+        best_acc = acc
+        plot_decision_boundary(nn, X_test, y_test, 'alpha-boundary.png')
+
+    print(f'[{i}] Accuracy: {acc}, Best: {best_acc}')
+end = time.time()
+print(f'Time taken: {end - start}')

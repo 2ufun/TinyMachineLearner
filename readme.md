@@ -107,7 +107,112 @@ df/dy = df/dg * dg/dy
 
 尽管df/dg在求取df/dx时已经计算出来，并且值没有发生变化，但是我们在求取df/dy仍然需要重新计算该值，当我们的神经网络层数和神经元数量增加时，这样的重复计算量是大到可怕的，所以我们必须改造我们的程序，让它像fib2那样高效。
 
-TODO: 说明待补充，详细程序请见Alpha文件夹 ...
+首先我们实际上只需要求取损失函数f对于单个权重w的梯度，它的计算是这样子的：
+
+df/dx = df/df1 * df1/df2 * df2/df3 .... ... * dfn/dx * dx/dx
+
+假设我们已经计算完了df/df1 * df1/df2 * df2/df3 .... ... * dfn/dx的值了，dx/dx毫无疑问是1，因为我们只需要获取f对w的梯度，对于中间结果我们并不关心，所以我们直接把最终值保存在w的对象里：
+
+```python
+class Var:
+    # ... ...
+    def grad(self, computed_value):
+        self.g = computed_value
+```
+
+需要注意的是，像这样的链条可能不止一个，比方说f是关于f1和f2的函数，而f1和f2都是关于x的函数，那么就会出现分支的情况：
+
+df/dx = df/df1 * df1/dx + df/df2 * df2/dx
+
+也就是说不同的computed_value可能会多次进入到同一个权重的grad方法中，为此我们需要把他们累加起来:
+
+```python
+class Var:
+    # ... ...
+    def grad(self, computed_value):
+        self.g += computed_value
+```
+
+我们前面定义的Add对象也需要做改造，其实Add也可以看作是一个函数：y = w1 + w2，w1和w2的权重都需要计算出来，而且Add这个函数没有改变两者的梯度，所以我们直接把前面累积的结果交给他们两个：
+
+```python
+class Add:
+    # ... ...
+    def grad(self, computed_value):
+        self.a.grad(computed_value)
+        self.b.grad(computed_value)
+```
+
+Sub对象和Add类似，不过它会让b的梯度为负，所以需要做一步处理：
+
+```python
+class Sub:
+    # ... ...
+    def grad(self, computed_value):
+        self.a.grad(computed_value)
+        self.b.grad(-computed_value)
+```
+
+定义其他基本运算或者函数的方法类似，你并不需要关心要对谁求微分，你只需要对你的参数求微分并且乘上前面传过来的累积值然后传递给你的参数继续进行微分计算就可以了，下面看一个具体的例子：
+
+```python
+x = Var(1)
+y = Var(2)
+z = Add(Add(x, Const(2)), y) # z = (x + 2) + y
+z.grad(1) # 由于z已经是“最前端”的计算式了，所以累计值记为1
+print(x.g, y.g) # 获取z对x和y的梯度
+```
+
+不过目前还有一个问题，当你通过`z.grad()`进行过一次梯度计算后，再次计算梯度时，x和y中的g已经不是从0开始累加的了，这里我们需要进行一个梯度清零的操作：
+
+```python
+class Var:
+    # ... ...
+    def zero_grad(self):
+        self.g = 0
+
+x = Var(1)
+y = Var(2)
+z = Add(Add(x, Const(2)), y) # z = (x + 2) + y
+z.grad(1)
+x.zero_grad() # 清零梯度
+y.zero_grad()
+z.grad(1)
+```
+
+当然还有一种方法，就是限制g只能通过`get_g`这样的方法读取，读取之后就立刻清零：
+
+```python
+class Var:
+    # ... ...
+    def get_g(self) -> float:
+        g = self.g
+        self.g = 0 # 读取后立刻清零
+        return g # 由于float是值类型，self.g的修改不影响g的值
+
+x = Var(1)
+y = Var(2)
+z = Add(Add(x, Const(2)), y) # z = (x + 2) + y
+print(x.get_g())
+z.grad(1)
+z.grad(1) # 不必手动清零
+```
+
+学过PyTorch的人可能有一种恍然大悟的感觉：
+
+- 为什么在`loss.backward()`之前要进行`optimizer.zero_grad()`的操作？
+
+为了清除上一次计算梯度时留存的结果
+
+- 为什么`zero_grad()`这项操作要由`optimizer`来完成？
+
+`optimizer`对象在构造时就传入了神经网络的全部权重的引用，它知道哪些权重留存了结果需要清零。而`loss`对象对这点一无所知，它可能就像我们定义的Add对象一样，只知道自己有两个加数，但是连这两个加数到底是变量还是一个新的计算式都不知道。
+
+- 为什么`optimizer`对象不依赖于`loss`对象？
+
+梯度计算的结果直接保存在对应的权重对象中，`optimizer`直接读取就可以了，毕竟它只需要梯度的值来更新权重。
+
+像这样逐步改造我们的结构化表达式，无论是运算速度还是内存占用都得到了极大的改善，我们的工作也终于迈入了实用的第一步。
 
 ## Tiny Learner
 

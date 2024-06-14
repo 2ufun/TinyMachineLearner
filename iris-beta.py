@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from Beta.TinyLearner import *
-from Beta.helper import plot_decision_boundary, softmax_for_network
+from Beta.helper import plot_decision_boundary, softmax_for_network, softmax
 
 # %% read data
 df = pd.read_csv('data/iris.data', header=None)
@@ -71,14 +71,33 @@ class Classifier:
         self.optimum.step(self.loss)
 
 
-classifier = Classifier(SGD(lr=0.01))
+nn = Classifier(Adam(lr=0.01))
 
 # %% train model
+best_acc = 0
 
 start = time.time()
-for i in range(1):
+for i in range(2):
+    # train loop
     for ax, ay in zip(X_train, y_train):
-        classifier.fit(ax, ay)
-end = time.time()
+        nn.fit(ax, ay)
 
-print(f'time: {end - start}')
+    # test loop
+    y_preds = []
+
+    for ax in X_test:
+        y_logits = nn(ax)
+        y_pred = np.argmax(softmax(y_logits))
+        y_preds.append(y_pred)
+
+    y_preds = np.array(y_preds)
+    tf = np.sum(y_preds == y_test)
+    acc = tf / len(y_preds)
+
+    if acc > best_acc:
+        best_acc = acc
+        plot_decision_boundary(nn, X_test, y_test, 'alpha-boundary.png')
+
+    print(f'[{i}] Accuracy: {acc}, Best: {best_acc}')
+end = time.time()
+print(f'Time taken: {end - start}')
