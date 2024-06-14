@@ -62,12 +62,12 @@ class NN:
         self.optimizer.step()
 
 
-nn = NN(Adam(0.01))
+nn = NN(MGD(0.01))
 
 best_acc = 0
 
 start = time.time()
-for i in range(50):
+for i in range(3):
     # train loop
     for ax, ay in zip(X_train, y_train):
         nn.step(ax, ay)
@@ -86,7 +86,7 @@ for i in range(50):
 
     if acc > best_acc:
         best_acc = acc
-        plot_decision_boundary(nn, X_test, y_test, 'alpha-boundary.png')
+        plot_decision_boundary(nn, X_test, y_test, './images/alpha-boundary.png')
 
     print(f'[{i}] Accuracy: {acc}, Best: {best_acc}')
 end = time.time()

@@ -70,7 +70,7 @@ z.value() # z在x=2,y=2处的值
 
 我们构建出来的计算式很像是数据结构中的二叉树，常量和变量就像叶子节点：
 
-![](./images/structural expression.png)
+![](./images/structural_expression.png)
 
 学过Lisp语言的人可能会非常亲切，毕竟Lisp的语句本身就是自带这种结构的。
 
