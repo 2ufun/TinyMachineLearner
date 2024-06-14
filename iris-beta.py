@@ -19,7 +19,7 @@ X_train, X_test, y_train, y_test = \
 # %% build neural network
 class Classifier:
     def __init__(self, optimum):
-        self.x = [[Number(0)], [Number(0)]]
+        self.x = [[Var(0)], [Var(0)]]
 
         self.weights_from_input = create_randoms(3, 2, seed=42)
         self.bias_from_input = create_randoms(3, 1, seed=42)
@@ -41,7 +41,7 @@ class Classifier:
         tmp = mat_mul(self.weights_to_output, tmp)
         self.net = mat_add(self.bias_to_output, tmp)
 
-        self.y = [Number(0), Number(0), Number(0)]
+        self.y = [Var(0), Var(0), Var(0)]
 
         prob = softmax_for_network([n[0] for n in self.net])
         product = [Mul(self.y[i], Log(prob[i])) for i in range(len(self.y))]

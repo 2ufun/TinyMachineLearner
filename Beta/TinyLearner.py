@@ -16,7 +16,7 @@ def create_matrix(rows: int, cols: int, builder) -> list:
 
 def create_randoms(rows: int, cols: int, seed=None) -> list:
     random.seed(seed)
-    return create_matrix(rows, cols, lambda i, j: Number(random.random()))
+    return create_matrix(rows, cols, lambda i, j: Var(random.random()))
 
 
 def mat_mul(m1: list, m2: list) -> list:

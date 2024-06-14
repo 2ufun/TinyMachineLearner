@@ -26,7 +26,7 @@ class Const(Expression):
         return False
 
 
-class Number(Expression):
+class Var(Expression):
     def __init__(self, v: float):
         self.v = v
 
@@ -116,7 +116,7 @@ class Div(Expression):
     def value(self) -> float:
         return self.a.value() / self.b.value()
 
-    def grad(self, x: Number) -> float:
+    def grad(self, x: Var) -> float:
         x = self.a.grad(x) * self.b.value() - \
             self.a.value() * self.b.grad(x)
         y = self.b.value() ** 2
