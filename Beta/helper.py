@@ -1,10 +1,6 @@
 from matplotlib import pyplot as plt
 
-from TinyGrader import *
-
-
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+from TinyGraderBeta import *
 
 
 def softmax(x):

@@ -1,12 +1,14 @@
+import time
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from TinyLearner import *
-from helper import softmax, softmax_for_network
+from TinyLearnerBeta import *
+from helper import plot_decision_boundary, softmax_for_network
 
 # %% read data
-df = pd.read_csv('data/iris.data', header=None)
-X = np.array(df.iloc[:, 0:4])
+df = pd.read_csv('../data/iris.data', header=None)
+X = np.array(df.iloc[:, 2:4])
 name_dict = {'Iris-setosa': 0, 'Iris-versicolor': 1, 'Iris-virginica': 2}
 y = df.iloc[:, 4].map(name_dict).to_numpy()
 
@@ -17,9 +19,9 @@ X_train, X_test, y_train, y_test = \
 # %% build neural network
 class Classifier:
     def __init__(self, optimum):
-        self.x = [[Number(0)], [Number(0)], [Number(0)], [Number(0)]]
+        self.x = [[Number(0)], [Number(0)]]
 
-        self.weights_from_input = create_randoms(3, 4, seed=42)
+        self.weights_from_input = create_randoms(3, 2, seed=42)
         self.bias_from_input = create_randoms(3, 1, seed=42)
 
         self.weights_hidden = create_randoms(3, 3, seed=42)
@@ -42,8 +44,8 @@ class Classifier:
         self.y = [Number(0), Number(0), Number(0)]
 
         prob = softmax_for_network([n[0] for n in self.net])
-        prod = [Mul(self.y[i], Log(prob[i])) for i in range(len(self.y))]
-        self.loss = Neg(Add(*prod))
+        product = [Mul(self.y[i], Log(prob[i])) for i in range(len(self.y))]
+        self.loss = Neg(Add(*product))
 
         self.optimum = optimum
         self.optimum.set_params([self.weights_from_input,
@@ -64,25 +66,21 @@ class Classifier:
 
         for i in range(len(self.y)):
             self.y[i].set_value(0)
-
         self.y[y].set_value(1)
 
         self.optimum.step(self.loss)
 
 
-classifier = Classifier(Adam(lr=0.01))
+classifier = Classifier(SGD(lr=0.01))
 
 # %% train model
-best_acc = 0
-for epoch in range(20):
+
+start = time.time()
+for i in range(10):
     for ax, ay in zip(X_train, y_train):
         classifier.fit(ax, ay)
+end = time.time()
 
-    y_logits = np.array([classifier(ax) for ax in X_test])
-    y_pred = np.array([softmax(ay).argmax() for ay in y_logits])
-    acc = np.sum(y_pred == y_test) / len(y_test)
+plot_decision_boundary(classifier, X_test, y_test, '../beta_boundary.png')
 
-    if acc > best_acc:
-        best_acc = acc
-
-    print(f'[{epoch}] Accuracy: {acc}, Best Accuracy: {best_acc}')
+print(f'time: {end - start}')
