@@ -96,7 +96,7 @@ for i in range(2):
 
     if acc > best_acc:
         best_acc = acc
-        plot_decision_boundary(nn, X_test, y_test, 'images/beta-boundary.png')
+        plot_decision_boundary(nn, X_test, y_test, 'images/beta-spiral-boundary.png')
 
     print(f'[{i}] Accuracy: {acc}, Best: {best_acc}')
 end = time.time()

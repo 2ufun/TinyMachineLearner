@@ -240,3 +240,11 @@ Alpha包内是经过改善的框架，Beta包内是我们最前面讲述的存�
 矩阵部分无需多言，一个是创建随机矩阵的函数，另一个是进行矩阵运算的函数。文件里描述的矩阵就是一个二维的Python列表，矩阵乘法也无非是简单的嵌套循环而已。
 
 优化算法里有普通的梯度下降优化器、动量梯度下降优化器、RMS梯度下降优化器和Adam优化器。后面三个和普通的梯度下降算法不同的地方就是参考了以前的梯度值，以此来调节参数更新的速度。
+
+## Application
+
+来自[cs231n](https://cs231n.github.io/neural-networks-case-study/)的数据集，三分类问题，数据点的分布成漩涡状，原始数据及测试集分类效果如下图，程序详见[spiral-test.py](spiral-test.py)：
+
+![](images/spiral.png)
+
+![](images/spiral-boundary.png)
