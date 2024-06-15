@@ -17,8 +17,8 @@ def plot_decision_boundary(model, X, y, file_name):
     y_pred = np.array([softmax(ay).argmax() for ay in y_logits])
 
     y_pred = y_pred.reshape(xx.shape)
-    plt.contourf(xx, yy, y_pred, cmap=plt.cm.RdYlBu, alpha=0.7)
-    plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.RdYlBu)
+    plt.contourf(xx, yy, y_pred, cmap=plt.cm.Spectral, alpha=0.7)
+    plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.Spectral)
     plt.xlim(xx.min(), xx.max())
     plt.ylim(yy.min(), yy.max())
     plt.savefig(file_name)

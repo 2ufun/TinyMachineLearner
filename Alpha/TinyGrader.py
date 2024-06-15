@@ -1,5 +1,10 @@
 import numpy as np
 
+eps = 1
+while 1 < 1 + eps:
+    eps /= 2
+eps *= 2
+
 
 class Expression:
     def value(self) -> float:
@@ -92,11 +97,17 @@ class Div(Expression):
         self.b = b
 
     def value(self) -> float:
-        return self.a.value() / self.b.value()
+        b_v = self.b.value()
+        if np.isclose(self.b.value(), 0):
+            b_v += eps
+        return self.a.value() / b_v
 
     def grad_backward(self, grad_value=1.0) -> None:
-        self.a.grad_backward(1 / self.b.value() * grad_value)
-        tmp = -(self.a.value() / (self.b.value() ** 2))
+        b_v = self.b.value()
+        if np.isclose(self.b.value(), 0):
+            b_v += eps
+        self.a.grad_backward(1 / b_v * grad_value)
+        tmp = -(self.a.value() / (b_v ** 2))
         self.b.grad_backward(tmp * grad_value)
 
 

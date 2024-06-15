@@ -248,3 +248,13 @@ Alpha包内是经过改善的框架，Beta包内是我们最前面讲述的存�
 ![](images/spiral.png)
 
 ![](images/spiral-boundary.png)
+
+还有sklearn库里自带的一些比较玩具的数据集，也测试了一下：
+
+![](images/circle.png)
+
+![](images/circle-boundary.png)
+
+![](images/blob.png)
+
+![](images/blob-boundary.png)

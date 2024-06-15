@@ -101,12 +101,6 @@ class MGD:
                     w[1] = delta
 
 
-eps = 1
-while 1 < 1 + eps:
-    eps /= 2
-eps *= 2
-
-
 def smooth(beta, average, g):
     return beta * average + (1 - beta) * g
 

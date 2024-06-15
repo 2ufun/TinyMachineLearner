@@ -1,47 +1,50 @@
-# read and split datasets
+# Code for creating a spiral dataset from CS231n
 import time
 
-import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import make_circles
 from sklearn.model_selection import train_test_split
 
 from Alpha.TinyLearner import *
-from Alpha.helper import softmax, plot_decision_boundary
+from Alpha.helper import plot_decision_boundary, softmax
 
-df = pd.read_csv('data/iris.data', header=None)
-xs = np.array(df.iloc[:, 2:4])
-name_dict = {'Iris-setosa': 0, 'Iris-versicolor': 1, 'Iris-virginica': 2}
-ys = df.iloc[:, 4].map(name_dict).to_numpy()
+# %% prepare the data
+X, y = make_circles(1000, noise=0.03, random_state=42)
 
 X_train, X_test, y_train, y_test = \
-    train_test_split(xs, ys, test_size=0.4, random_state=42)
+    train_test_split(X, y, test_size=0.4, random_state=42)
 
+# %% build the neural network
 
 class NN:
     def __init__(self):
         self.x = create_zeros(2, 1)
-        self.weights_1 = create_randoms(3, 2, 42)
-        self.bias_1 = create_randoms(3, 1, 42)
-        self.weights_2 = create_randoms(3, 3, 42)
-        self.bias_2 = create_randoms(3, 1, 42)
-        self.weights_3 = create_randoms(3, 3, 42)
-        self.bias_3 = create_randoms(3, 1, 42)
+        self.weights_1 = create_randoms(20, 2, 42)
+        self.bias_1 = create_randoms(20, 1, 42)
+
+        # self.weights_2 = create_randoms(5, 5, 42)
+        # self.bias_2 = create_randoms(5, 1, 42)
+
+        self.weights_3 = create_randoms(2, 20, 42)
+        self.bias_3 = create_randoms(2, 1, 42)
 
         tmp = mat_mul(self.weights_1, self.x)
         tmp = mat_add(self.bias_1, tmp)
         tmp = [[ReLU(i) for i in row] for row in tmp]
-        tmp = mat_mul(self.weights_2, tmp)
-        tmp = mat_add(self.bias_2, tmp)
-        tmp = [[ReLU(i) for i in row] for row in tmp]
+        # tmp = mat_mul(self.weights_2, tmp)
+        # tmp = mat_add(self.bias_2, tmp)
+        # tmp = [[ReLU(i) for i in row] for row in tmp]
         tmp = mat_mul(self.weights_3, tmp)
         self.y_pred = mat_add(self.bias_3, tmp)
 
-        self.y_true = create_zeros(3, 1)
+        self.y_true = create_zeros(2, 1)
 
         self.params = []
         self.params.append(self.weights_1)
         self.params.append(self.bias_1)
-        self.params.append(self.weights_2)
-        self.params.append(self.bias_2)
+        # self.params.append(self.weights_2)
+        # self.params.append(self.bias_2)
         self.params.append(self.weights_3)
         self.params.append(self.bias_3)
 
@@ -65,7 +68,7 @@ optimizer = Adam(nn.params, lr=0.01)
 
 best_acc = 0
 start = time.time()
-for i in range(50):
+for i in range(500):
     # train loop
     for ax, ay in zip(X_train, y_train):
         nn.fit(ax, ay)
@@ -86,13 +89,12 @@ for i in range(50):
 
     if acc > best_acc:
         best_acc = acc
+        plot_decision_boundary(nn, X_test, y_test, 'images/circle-boundary.png')
 
-    print(f'[{i}] Accuracy: {acc}, Best: {best_acc}')
+    print(f'[{i}] Accuracy: {acc:.2f}, Best: {best_acc:.2f}')
 
     if best_acc == 1:
         break
 
 end = time.time()
 print(f'Time taken: {end - start}')
-
-plot_decision_boundary(nn, X_test, y_test, 'images/circle-boundary.png')
