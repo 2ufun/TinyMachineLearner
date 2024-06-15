@@ -2,6 +2,8 @@
 
 本人闲来无事，文思泉涌写出来的迷你机器学习库，具有运算速度慢、运行占用内存大、精度低、泛用性差等优点 :P
 
+（PS：经过几个版本的迭代后，现在已经长得非常像PyTorch了，或许我应该把它改名为TinyTorch之类的）
+
 ## Tiny Grader
 
 想要从头实现一个神经网络，就得先解决自动微分的问题，其中最简单的办法就是用有限差分做近似：
@@ -11,6 +13,7 @@ eps = 1
 while 1 < 1 + eps:
     eps /= 2
 eps *= 2
+
 
 def d(f, x):
     return (f(x + eps) - f(x)) / eps
@@ -26,18 +29,24 @@ def d(f, x):
 class Const:
     def __init__(self, v: float):
         self.v = v
+
     def value(self) -> float:
         return self.v
+
     def grad(self, x) -> float:
         return 0
+
 
 class Var:
     def __init__(self, v: float):
         self.v = v
+
     def value(self) -> float:
         return self.v
+
     def set_value(self, v: float) -> None:
         self.v = v
+
     def grad(self, x) -> float:
         return 1 if x == self else 0
 ```
@@ -51,8 +60,10 @@ class Add:
     def __init__(self, a, b):
         self.a = a
         self.b = b
+
     def value(self) -> float:
         return self.a.value() + self.b.value()
+
     def grad(self, x) -> float:
         return self.a.grad(x) + self.b.grad(x)
 ```
@@ -62,10 +73,10 @@ class Add:
 ```python
 x = Var(1)
 y = Var(2)
-z = Add(Add(x, Const(2)), y) # z = (x + 2) + y
-z.grad(x) # z在x=1,y=2处对于x的偏导
+z = Add(Add(x, Const(2)), y)  # z = (x + 2) + y
+z.grad(x)  # z在x=1,y=2处对于x的偏导
 x.set_value(2)
-z.value() # z在x=2,y=2处的值
+z.value()  # z在x=2,y=2处的值
 ```
 
 我们构建出来的计算式很像是数据结构中的二叉树，常量和变量就像叶子节点：
@@ -81,7 +92,7 @@ def fib1(n):
     if n == 0 or n == 1:
         return n
     else:
-        return fib1(n-1) + fib1(n-2)
+        return fib1(n - 1) + fib1(n - 2)
 
 
 def fib2(n):
@@ -89,7 +100,8 @@ def fib2(n):
         if n == 0:
             return n1
         else:
-            return helper(n2, n1+n2, n-1)
+            return helper(n2, n1 + n2, n - 1)
+
     return helper(0, 1, n)
 ```
 
@@ -111,7 +123,8 @@ df/dy = df/dg * dg/dy
 
 df/dx = df/df1 * df1/df2 * df2/df3 .... ... * dfn/dx * dx/dx
 
-假设我们已经计算完了df/df1 * df1/df2 * df2/df3 .... ... * dfn/dx的值了，dx/dx毫无疑问是1，因为我们只需要获取f对w的梯度，对于中间结果我们并不关心，所以我们直接把最终值保存在w的对象里：
+假设我们已经计算完了df/df1 * df1/df2 * df2/df3 .... ... *
+dfn/dx的值了，dx/dx毫无疑问是1，因为我们只需要获取f对w的梯度，对于中间结果我们并不关心，所以我们直接把最终值保存在w的对象里：
 
 ```python
 class Var:
@@ -133,7 +146,8 @@ class Var:
         self.g += computed_value
 ```
 
-我们前面定义的Add对象也需要做改造，其实Add也可以看作是一个函数：y = w1 + w2，w1和w2的权重都需要计算出来，而且Add这个函数没有改变两者的梯度，所以我们直接把前面累积的结果交给他们两个：
+我们前面定义的Add对象也需要做改造，其实Add也可以看作是一个函数：y = w1 +
+w2，w1和w2的权重都需要计算出来，而且Add这个函数没有改变两者的梯度，所以我们直接把前面累积的结果交给他们两个：
 
 ```python
 class Add:
@@ -158,9 +172,9 @@ class Sub:
 ```python
 x = Var(1)
 y = Var(2)
-z = Add(Add(x, Const(2)), y) # z = (x + 2) + y
-z.grad(1) # 由于z已经是“最前端”的计算式了，所以累计值记为1
-print(x.g, y.g) # 获取z对x和y的梯度
+z = Add(Add(x, Const(2)), y)  # z = (x + 2) + y
+z.grad(1)  # 由于z已经是“最前端”的计算式了，所以累计值记为1
+print(x.g, y.g)  # 获取z对x和y的梯度
 ```
 
 不过目前还有一个问题，当你通过`z.grad()`进行过一次梯度计算后，再次计算梯度时，x和y中的g已经不是从0开始累加的了，这里我们需要进行一个梯度清零的操作：
@@ -171,11 +185,12 @@ class Var:
     def zero_grad(self):
         self.g = 0
 
+
 x = Var(1)
 y = Var(2)
-z = Add(Add(x, Const(2)), y) # z = (x + 2) + y
+z = Add(Add(x, Const(2)), y)  # z = (x + 2) + y
 z.grad(1)
-x.zero_grad() # 清零梯度
+x.zero_grad()  # 清零梯度
 y.zero_grad()
 z.grad(1)
 ```
@@ -187,32 +202,36 @@ class Var:
     # ... ...
     def get_g(self) -> float:
         g = self.g
-        self.g = 0 # 读取后立刻清零
-        return g # 由于float是值类型，self.g的修改不影响g的值
+        self.g = 0  # 读取后立刻清零
+        return g  # 由于float是值类型，self.g的修改不影响g的值
+
 
 x = Var(1)
 y = Var(2)
-z = Add(Add(x, Const(2)), y) # z = (x + 2) + y
+z = Add(Add(x, Const(2)), y)  # z = (x + 2) + y
 print(x.get_g())
 z.grad(1)
-z.grad(1) # 不必手动清零
+z.grad(1)  # 不必手动清零
 ```
 
 学过PyTorch的人可能有一种恍然大悟的感觉：
 
 - 为什么在`loss.backward()`之前要进行`optimizer.zero_grad()`的操作？
 
-为了清除上一次计算梯度时留存的结果
+  为了清除上一次计算梯度时留存的结果
 
 - 为什么`zero_grad()`这项操作要由`optimizer`来完成？
 
-`optimizer`对象在构造时就传入了神经网络的全部权重的引用，它知道哪些权重留存了结果需要清零。而`loss`对象对这点一无所知，它可能就像我们定义的Add对象一样，只知道自己有两个加数，但是连这两个加数到底是变量还是一个新的计算式都不知道。
+  `optimizer`对象在构造时就传入了神经网络的全部权重的引用，它知道哪些权重留存了结果需要清零。而`loss`
+  对象对这点一无所知，它可能就像我们定义的Add对象一样，只知道自己有两个加数，但是连这两个加数到底是变量还是一个新的计算式都不知道。
 
 - 为什么`optimizer`对象不依赖于`loss`对象？
 
-梯度计算的结果直接保存在对应的权重对象中，`optimizer`直接读取就可以了，毕竟它只需要梯度的值来更新权重。
+  梯度计算的结果直接保存在对应的权重对象中，`optimizer`直接读取就可以了，毕竟它只需要梯度的值来更新权重。
 
 像这样逐步改造我们的结构化表达式，无论是运算速度还是内存占用都得到了极大的改善，我们的工作也终于迈入了实用的第一步。
+
+Alpha包内是经过改善的框架，Beta包内是我们最前面讲述的存在性能问题的框架。
 
 ## Tiny Learner
 

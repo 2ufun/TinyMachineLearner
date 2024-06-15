@@ -68,7 +68,7 @@ class Classifier:
             self.y[i].set_value(0)
         self.y[y].set_value(1)
 
-        self.optimum.step(self.loss)
+        self.optimum.fit(self.loss)
 
 
 nn = Classifier(Adam(lr=0.01))

@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from Alpha.TinyLearner import *
-from Alpha.helper import softmax_for_network, softmax, plot_decision_boundary
+from Alpha.helper import softmax, plot_decision_boundary
 
 df = pd.read_csv('data/iris.data', header=None)
 xs = np.array(df.iloc[:, 2:4])
@@ -17,7 +17,7 @@ X_train, X_test, y_train, y_test = \
 
 
 class NN:
-    def __init__(self, optimizer):
+    def __init__(self):
         self.x = create_zeros(2, 1)
         self.weights_1 = create_randoms(3, 2, 42)
         self.bias_1 = create_randoms(3, 1, 42)
@@ -36,45 +36,45 @@ class NN:
         self.y_pred = mat_add(self.bias_3, tmp)
 
         self.y_true = create_zeros(3, 1)
-        prob = softmax_for_network([n[0] for n in self.y_pred])
-        prod = [Mul(self.y_true[i][0], Log(prob[i])) for i in range(len(self.y_true))]
-        self.loss = Neg(Add(*prod))
 
-        self.optimizer = optimizer
-        optimizer.set_params([self.weights_1, self.weights_2, self.weights_3,
-                              self.bias_1, self.bias_2, self.bias_3])
+        self.params = []
+        self.params.append(self.weights_1)
+        self.params.append(self.bias_1)
+        self.params.append(self.weights_2)
+        self.params.append(self.bias_2)
+        self.params.append(self.weights_3)
+        self.params.append(self.bias_3)
 
-    def __call__(self, x):
+    def __call__(self, x) -> list[float]:
         for i in range(len(x)):
             self.x[i][0].v = x[i]
-        return [[i.value() for i in row] for row in self.y_pred]
+        return [y[0].value() for y in self.y_pred]
 
-    def step(self, x, y):
+    def fit(self, x, y):
         for i in range(len(x)):
             self.x[i][0].v = x[i]
 
         for i in range(len(self.y_true)):
             self.y_true[i][0].v = 0
-        self.y_true[int(y)][0].v = 1
-
-        self.optimizer.zero_grad()
-        self.loss.grad_backward()
-        self.optimizer.step()
+        self.y_true[y][0].v = 1
 
 
-nn = NN(MGD(0.01))
+nn = NN()
+loss = CrossEntropyLoss(nn)
+optimizer = Adam(nn.params, lr=0.01)
 
 best_acc = 0
-
 start = time.time()
-for i in range(3):
+for i in range(50):
     # train loop
     for ax, ay in zip(X_train, y_train):
-        nn.step(ax, ay)
+        nn.fit(ax, ay)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
     # test loop
     y_preds = []
-
     for ax in X_test:
         y_logits = nn(ax)
         y_pred = np.argmax(softmax(y_logits))
@@ -86,8 +86,13 @@ for i in range(3):
 
     if acc > best_acc:
         best_acc = acc
-        plot_decision_boundary(nn, X_test, y_test, './images/alpha-boundary.png')
 
     print(f'[{i}] Accuracy: {acc}, Best: {best_acc}')
+
+    if best_acc == 1:
+        break
+
 end = time.time()
 print(f'Time taken: {end - start}')
+
+plot_decision_boundary(nn, X_test, y_test, './images/alpha-boundary.png')
