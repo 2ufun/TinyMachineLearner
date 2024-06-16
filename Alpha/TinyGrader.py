@@ -104,7 +104,7 @@ class Div(Expression):
 
     def grad_backward(self, grad_value=1.0) -> None:
         b_v = self.b.value()
-        if np.isclose(self.b.value(), 0):
+        if np.isclose(b_v, 0):
             b_v += eps
         self.a.grad_backward(1 / b_v * grad_value)
         tmp = -(self.a.value() / (b_v ** 2))
@@ -156,10 +156,12 @@ class Max(Expression):
         return max(self.a.value(), self.b.value())
 
     def grad_backward(self, grad_value=1.0) -> None:
-        if self.a.value() > self.b.value():
+        a_v = self.a.value()
+        b_v = self.b.value()
+        if a_v > b_v:
             self.a.grad_backward(grad_value)
             self.b.grad_backward(0)
-        elif self.b.value() > self.a.value():
+        elif a_v < b_v:
             self.a.grad_backward(0)
             self.b.grad_backward(grad_value)
         else:

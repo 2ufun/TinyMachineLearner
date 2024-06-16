@@ -1,8 +1,6 @@
 # Code for creating a spiral dataset from CS231n
 import time
 
-import matplotlib.pyplot as plt
-import numpy as np
 from sklearn.datasets import make_circles
 from sklearn.model_selection import train_test_split
 
@@ -14,6 +12,7 @@ X, y = make_circles(1000, noise=0.03, random_state=42)
 
 X_train, X_test, y_train, y_test = \
     train_test_split(X, y, test_size=0.4, random_state=42)
+
 
 # %% build the neural network
 

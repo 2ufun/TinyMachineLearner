@@ -19,10 +19,10 @@ X, y = make_blobs(n_samples=500,
 X_train, X_test, y_train, y_test = \
     train_test_split(X, y, test_size=0.4, random_state=42)
 
-plt.figure(figsize=(10, 7))
 plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.Spectral)
 plt.savefig('images/blob.png')
 plt.show()
+
 
 # %% build the neural network
 

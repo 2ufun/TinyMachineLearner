@@ -2,7 +2,6 @@
 import time
 
 import matplotlib.pyplot as plt
-import numpy as np
 from sklearn.model_selection import train_test_split
 
 from Alpha.TinyLearner import *
@@ -11,7 +10,7 @@ from Alpha.helper import plot_decision_boundary, softmax
 # %% prepare the data
 N = 100  # number of points per class
 D = 2  # dimensionality
-K = 3 # number of classes
+K = 3  # number of classes
 X = np.zeros((N * K, D))  # data matrix (each row = single example)
 y = np.zeros(N * K, dtype='uint8')  # class labels
 for j in range(K):
@@ -27,6 +26,7 @@ plt.show()
 
 X_train, X_test, y_train, y_test = \
     train_test_split(X, y, test_size=0.4, random_state=42)
+
 
 # %% build the neural network
 
