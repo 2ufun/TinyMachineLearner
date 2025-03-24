@@ -1,19 +1,18 @@
-# read and split datasets
-import time
-
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from Alpha.TinyLearner import *
-from Alpha.helper import softmax, plot_decision_boundary
+from tiny_machine_learner.tiny_grader import *
+from tiny_machine_learner.tiny_learner import *
+from tiny_machine_learner.helper import *
 
-df = pd.read_csv('data/iris.data', header=None)
+df = pd.read_csv("data/iris.data", header=None)
 xs = np.array(df.iloc[:, 2:4])
-name_dict = {'Iris-setosa': 0, 'Iris-versicolor': 1, 'Iris-virginica': 2}
+name_dict = {"Iris-setosa": 0, "Iris-versicolor": 1, "Iris-virginica": 2}
 ys = df.iloc[:, 4].map(name_dict).to_numpy()
 
-X_train, X_test, y_train, y_test = \
-    train_test_split(xs, ys, test_size=0.4, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    xs, ys, test_size=0.4, random_state=42
+)
 
 
 class NN:
@@ -64,7 +63,6 @@ loss = CrossEntropyLoss(nn)
 optimizer = Adam(nn.params, lr=0.01)
 
 best_acc = 0
-start = time.time()
 for i in range(50):
     # train loop
     for ax, ay in zip(X_train, y_train):
@@ -86,13 +84,9 @@ for i in range(50):
 
     if acc > best_acc:
         best_acc = acc
+        plot_decision_boundary(nn, X_test, y_test, "images/iris-boundary.png")
 
-    print(f'[{i}] Accuracy: {acc}, Best: {best_acc}')
+    print(f"[{i}] Accuracy: {acc:.5f}, Best: {best_acc:.5f}")
 
     if best_acc == 1:
         break
-
-end = time.time()
-print(f'Time taken: {end - start}')
-
-plot_decision_boundary(nn, X_test, y_test, 'images/circle-boundary.png')
